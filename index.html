@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Off-Campus Housing Check-Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one narrow column of numbered form sections, phone-first, sticky progress bar */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#14213d; --muted:#5b6782; --line:#d7dce8;
+  --accent:#0b3d91; --accent-soft:#e3ebfa; --accent-ink:#ffffff;
+  --warn:#b4530a; --warn-soft:#fdf0e3; --ok:#1d7a4f; --ok-soft:#e2f4ea; --err:#b42318;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1424; --surface:#161e33; --ink:#e6ebf5; --muted:#9aa6c2; --line:#2a3552;
+  --accent:#7ea6f2; --accent-soft:#1e2c4f; --accent-ink:#0e1424;
+  --warn:#f0a35e; --warn-soft:#3a2716; --ok:#5fcf95; --ok-soft:#173326; --err:#ff8a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1424; --surface:#161e33; --ink:#e6ebf5; --muted:#9aa6c2; --line:#2a3552;
+  --accent:#7ea6f2; --accent-soft:#1e2c4f; --accent-ink:#0e1424;
+  --warn:#f0a35e; --warn-soft:#3a2716; --ok:#5fcf95; --ok-soft:#173326; --err:#ff8a80; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:680px;margin:0 auto}
+header.top{padding-block:28px 12px}
+.eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,6vw,34px);line-height:1.1;margin:6px 0 10px;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:60ch}
+.progress{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;gap:6px}
+.progress span{flex:1;height:5px;border-radius:3px;background:var(--line);transition:background .2s}
+.progress span.done{background:var(--accent)}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:16px;display:grid;gap:16px}
+section.card[hidden]{display:none!important}
+h2{font-family:var(--display);font-size:20px;margin:0;display:flex;gap:10px;align-items:baseline;text-wrap:balance}
+h2 .n{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:.06em}
+.hint{color:var(--muted);font-size:14px;margin:-8px 0 0}
+label.f{display:grid;gap:6px;font-weight:600;font-size:15px}
+.req::after{content:" *";color:var(--err)}
+input[type=text],input[type=tel],input[type=date],textarea,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:80px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,.chip:focus-within,.seg label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+fieldset{border:0;padding:0;margin:0;min-width:0;display:grid;gap:8px}
+legend{font-weight:600;font-size:15px;padding:0;margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-weight:600;font-size:15px}
+.seg input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative;cursor:pointer}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:6px 11px;border:1px solid var(--line);border-radius:6px;font-size:14px;background:var(--bg)}
+.chip input:checked+span{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+.chips.issue .chip input:checked+span{background:var(--warn-soft);border-color:var(--warn)}
+.checklist{display:grid;gap:10px}
+.checklist label{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;cursor:pointer}
+.checklist input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent)}
+.room{border-top:1px solid var(--line);padding-top:16px;display:grid;gap:10px}
+.room:first-of-type{border-top:0;padding-top:0}
+.room h3{font-family:var(--display);font-size:16px;margin:0}
+.room .detail{display:grid;gap:10px;padding:12px;border-radius:8px;background:var(--warn-soft)}
+.room .detail[hidden]{display:none!important}
+.room .detail .lbl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--warn)}
+.likert{display:grid;gap:14px}
+.likert .q{display:grid;gap:8px}
+.likert .q p{margin:0;font-weight:600;font-size:15px}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale label{position:relative;cursor:pointer}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale span{display:block;text-align:center;padding:8px 0;border:1px solid var(--line);border-radius:6px;font-weight:700;background:var(--bg);font-variant-numeric:tabular-nums}
+.scale input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.scale input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:-4px}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:20px;text-align:center;display:grid;gap:8px;justify-items:center}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.btn{font:inherit;font-weight:700;border-radius:8px;padding:12px 18px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.small{padding:6px 12px;font-size:14px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;width:100%}
+.thumbs figure{margin:0;position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--line);max-width:100%}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.thumbs button{position:absolute;top:4px;right:4px;border:0;border-radius:50%;width:24px;height:24px;background:var(--ink);color:var(--surface);cursor:pointer;font-weight:700;line-height:1}
+.note{font-size:14px;padding:12px 14px;border-radius:8px;background:var(--accent-soft)}
+.note.warn{background:var(--warn-soft)}
+.cert{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:15px}
+.cert input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.error{color:var(--err);font-weight:600;font-size:14px}
+#done{border-color:var(--ok)}
+.addr{display:flex;flex-wrap:wrap;gap:8px}
+.addr code{font-family:ui-monospace,Menlo,monospace;font-size:14px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;user-select:all;overflow-wrap:anywhere}
+.steps{margin:0;padding-left:20px;display:grid;gap:6px}
+pre.summary{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:260px;overflow:auto;margin:0}
+footer{color:var(--muted);font-size:13px;margin-top:28px;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Dr. Pallavi Patel School of Health Sciences · Off-Campus Housing</div>
+    <h1>Unit Condition &amp; Exit Survey</h1>
+    <p class="lede">One form for your move-in condition report or your move-out check-out. It takes about 5 minutes. Have your phone camera ready for photos of your bedroom and any problems you find.</p>
+  </header>
+
+  <div class="progress" aria-hidden="true" id="progress"></div>
+
+  <form id="form" novalidate>
+    <!-- 1 -->
+    <section class="card" data-sec>
+      <h2><span class="n">01</span>You &amp; your unit</h2>
+      <fieldset>
+        <legend class="req">Why are you completing this form?</legend>
+        <div class="seg">
+          <label><input type="radio" name="type" id="type-in" value="Move-In"><span>Move-in condition report</span></label>
+          <label><input type="radio" name="type" id="type-out" value="Move-Out" checked><span>Move-out check-out</span></label>
+        </div>
+      </fieldset>
+      <p class="note" id="movein-note" hidden>Submit within <strong>48 hours</strong> of moving in. Anything you don't report is considered clean, safe and in good condition, so note every defect, damage, safety or pest concern now.</p>
+      <div class="row2">
+        <label class="f"><span class="req">Full name</span><input type="text" id="name" autocomplete="name"></label>
+        <label class="f"><span class="req">Mobile number</span><input type="tel" id="mobile" autocomplete="tel"></label>
+      </div>
+      <div class="row2">
+        <label class="f"><span class="req">Program name</span><input type="text" id="program"></label>
+        <label class="f"><span class="req" id="date-label">Move-out date</span><input type="date" id="date"></label>
+      </div>
+      <fieldset>
+        <legend class="req">Term</legend>
+        <div class="seg">
+          <label><input type="radio" name="term" id="term-w" value="Winter"><span>Winter</span></label>
+          <label><input type="radio" name="term" id="term-s" value="Summer"><span>Summer</span></label>
+          <label><input type="radio" name="term" id="term-f" value="Fall"><span>Fall</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="req">Housing location (check all that apply)</legend>
+        <div class="chips" id="locations"></div>
+      </fieldset>
+      <div class="row2">
+        <label class="f">Apartment community name<input type="text" id="community"></label>
+        <label class="f">Apartment # (if different from above)<input type="text" id="apt"></label>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="card" data-sec data-out>
+      <h2><span class="n">02</span>Move-out checklist</h2>
+      <p class="hint">Confirm each item before you leave the apartment.</p>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="card" data-sec>
+      <h2><span class="n" id="n-cond">03</span>Unit condition</h2>
+      <p class="hint">For each area, tap <strong>Issues to report</strong> only if something is damaged, dirty, missing, not working, or a safety or pest concern. Then tag the items and describe the problem.</p>
+      <div id="rooms"></div>
+    </section>
+
+    <!-- 4 -->
+    <section class="card" data-sec>
+      <h2><span class="n" id="n-photo">04</span>Photos</h2>
+      <p class="hint">Add photos of your bedroom, the shared areas, and every issue you reported. They protect you when responsibility for damage is decided.</p>
+      <div class="drop" id="drop">
+        <strong>Take or choose photos</strong>
+        <span class="hint" style="margin:0">JPG, PNG or HEIC · as many as you need</span>
+        <label class="btn" for="photos">Add photos</label>
+        <input type="file" id="photos" accept="image/*" multiple hidden>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+      <p class="note warn">Photos stay on your phone until you email them. After you submit, you'll attach them to the email this form opens.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="card" data-sec data-out>
+      <h2><span class="n">05</span>Your housing experience</h2>
+      <div class="likert" id="likert"></div>
+      <fieldset>
+        <legend>Do you have recommendations for improving the off-campus housing experience?</legend>
+        <div class="seg">
+          <label><input type="radio" name="rec" id="rec-y" value="Yes"><span>Yes</span></label>
+          <label><input type="radio" name="rec" id="rec-n" value="No"><span>No</span></label>
+        </div>
+      </fieldset>
+      <label class="f" id="rec-box" hidden>Your recommendations<textarea id="recText"></textarea></label>
+    </section>
+
+    <!-- 6 -->
+    <section class="card" data-sec>
+      <h2><span class="n" id="n-sign">06</span>Acknowledge &amp; sign</h2>
+      <label class="cert"><input type="checkbox" id="ack1"><span>I confirm that the information above accurately reflects the condition of the unit and its contents at the time of this inspection, and I understand it will be used to help determine responsibility for any damage found at move-out.</span></label>
+      <label class="cert" id="ack2-row"><input type="checkbox" id="ack2"><span>I certify that I have completed all required move-out procedures and understand that failure to do so may result in further inspection and/or referral for disciplinary action.</span></label>
+      <div class="row2">
+        <label class="f"><span class="req">Type your full name as signature</span><input type="text" id="sig"></label>
+        <label class="f"><span class="req">Date of completion</span><input type="date" id="sigdate"></label>
+      </div>
+      <p class="error" id="err" role="alert" hidden></p>
+      <div class="actions"><button class="btn" type="submit">Review &amp; submit</button></div>
+    </section>
+  </form>
+
+  <section class="card" id="done" hidden>
+    <h2>Last step: send it by email</h2>
+    <ol class="steps">
+      <li>Tap <strong>Open email</strong>. Your report is filled in and addressed to both offices.</li>
+      <li>Attach your <strong id="photo-count">0 photos</strong> in your mail app.</li>
+      <li>Press send. Your form isn't submitted until the email goes out.</li>
+    </ol>
+    <div class="actions" style="margin-top:0">
+      <a class="btn" id="mailto" href="#" target="_blank" rel="noopener">Open email</a>
+      <button class="btn ghost" type="button" id="copy">Copy report</button>
+      <button class="btn ghost" type="button" id="edit">Edit answers</button>
+    </div>
+    <p class="hint" style="margin:0">If the email doesn't open, copy the report and send it, with your photos, to:</p>
+    <div class="addr"><code>realestateleases@nova.edu</code><code>odoo@nova.edu</code></div>
+    <pre class="summary" id="summary"></pre>
+  </section>
+
+  <footer>Nova Southeastern University · Off-Campus Student Housing</footer>
+</div>
+
+<script>
+const LOCATIONS=["Bradenton (#103)","Bradenton (#1416)","Brunswick (#214)","Clearwater (#2-307)","Clearwater (#3-307)","Clewiston (#202)","Clewiston (#221)","Clewiston (#227)","Doral (#6-114)","Doral (#4-103)","Fort Myers (#103)","Fort Walton Beach (#103)","Fort Walton Beach (#105)","Gainesville (#12-304)","Gainesville (#6-308)","Kennesaw (#210)","Melbourne (#19-105)","Macon (#709)","Mt. Dora (#25-202)","Orlando (#527)","Panama City Beach (#E2)","Port Charlotte (#15557)","Port Orange (#8-302)","Sebring (#2605)","Tallahassee (#317)","Tallahassee (#332)"];
+const CHECKLIST=["Removed all personal belongings, including all food (opened and unopened)","Cleaned out the refrigerator","Took all trash to the community dumpster","Returned all furniture to its original location","Unplugged portable appliances, turned off all lights, and locked all doors","Returned all apartment keys, mailbox keys, gate devices, parking passes and fitness cards to the leasing office (unless told otherwise)"];
+const COMMON=["Walls","Plugs / switches / A/C vents","Ceiling","Light fixtures / bulbs","Floor / carpet","Doors","Windows / latches / screens","Window coverings","Closets / rods / shelves","Closet lights","Stains or mold"];
+const ROOMS=[
+ {id:"general",name:"Whole unit",items:["Thermostat","Ceiling fans","Exterior door / screen / doorbell / viewer","Internet modem","Washer / dryer","Alarm system","Fire extinguishers","Pests"]},
+ {id:"living",name:"Living room",items:["Sofa","Couch","Chair","Coffee table","End tables","Lamps",...COMMON]},
+ {id:"dining",name:"Dining room",items:["Dining table","Dining chairs",...COMMON],na:true},
+ {id:"bedroom",name:"Bedroom(s)",items:["Bed","Chest","Nightstands","Night lamps",...COMMON],which:true},
+ {id:"kitchen",name:"Kitchen",items:["Refrigerator","Fridge trays / shelves / crisper / light","Stove","Stove trays / pans","Microwave","Dishwasher","Sink / disposal","Cabinets","Drawers / handles","Countertop","Walls","Plugs / switches / A/C vents","Ceiling","Light fixtures / bulbs","Floor","Leaks / water stains / mold"]},
+ {id:"bath",name:"Bathroom(s)",items:["Sink / faucet / stopper","Mirror","Cabinets / drawers","Toilet / paper holder","Bathtub / enclosure","Shower door / rod","Entry door / locks","Walls","Plugs / switches / A/C vents","Ceiling","Light fixtures / bulbs","Floor / tile","Leaks / water stains / mold"],which:true}
+];
+const LIKERT=["Overall quality of your student housing","Responsiveness and completion of maintenance requests","Cleanliness of your living space at move-in","Noise level and your ability to study","Security of your apartment unit","Safety and security of the apartment community","Availability of parking","Community amenities (fitness center, pool, etc.)","Internet service in the apartment"];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+$("#locations").innerHTML=LOCATIONS.map((l,i)=>`<label class="chip"><input type="checkbox" id="loc-${i}" value="${esc(l)}"><span>${esc(l)}</span></label>`).join("");
+$("#checklist").innerHTML=CHECKLIST.map((c,i)=>`<label><input type="checkbox" id="chk-${i}"><span>${esc(c)}</span></label>`).join("");
+$("#rooms").innerHTML=ROOMS.map(r=>`
+ <div class="room" id="room-${r.id}">
+  <h3>${r.name}</h3>
+  <div class="seg">
+   <label><input type="radio" name="st-${r.id}" id="st-${r.id}-ok" value="ok" checked><span>All satisfactory</span></label>
+   <label><input type="radio" name="st-${r.id}" id="st-${r.id}-issue" value="issue"><span>Issues to report</span></label>
+   ${r.na?`<label><input type="radio" name="st-${r.id}" id="st-${r.id}-na" value="na"><span>Not in my unit</span></label>`:""}
+  </div>
+  <div class="detail" id="det-${r.id}" hidden>
+   <span class="lbl">Tag what's wrong</span>
+   <div class="chips issue">${r.items.map((it,i)=>`<label class="chip"><input type="checkbox" id="it-${r.id}-${i}" value="${esc(it)}"><span>${esc(it)}</span></label>`).join("")}</div>
+   ${r.which?`<label class="f">Which room? (e.g. Bedroom 2, hall bath)<input type="text" id="which-${r.id}"></label>`:""}
+   <label class="f">Describe the problem and any repair suggestion<textarea id="note-${r.id}" placeholder="e.g. Hole in closet door, about 2 in. wide. Missing nightstand."></textarea></label>
+  </div>
+ </div>`).join("");
+$("#likert").innerHTML=`<div class="legend"><span>1 = Very dissatisfied</span><span>5 = Very satisfied</span></div>`+LIKERT.map((q,i)=>`
+ <div class="q" role="radiogroup" aria-label="${esc(q)}"><p>${i+1}. ${esc(q)}</p>
+ <div class="scale">${[1,2,3,4,5].map(v=>`<label><input type="radio" name="lk-${i}" id="lk-${i}-${v}" value="${v}"><span>${v}</span></label>`).join("")}</div></div>`).join("");
+
+ROOMS.forEach(r=>document.querySelectorAll(`[name="st-${r.id}"]`).forEach(el=>el.addEventListener("change",()=>{$("#det-"+r.id).hidden=el.value!=="issue"||!el.checked})));
+document.querySelectorAll('[name="rec"]').forEach(el=>el.addEventListener("change",()=>{$("#rec-box").hidden=$("#rec-y").checked?false:true}));
+
+const today=new Date();const iso=new Date(today-today.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+$("#sigdate").value=iso;
+
+function isOut(){return $("#type-out").checked}
+function applyType(){
+  const out=isOut();
+  document.querySelectorAll("[data-out]").forEach(s=>s.hidden=!out);
+  $("#movein-note").hidden=out;$("#ack2-row").hidden=!out;
+  $("#date-label").textContent=out?"Move-out date":"Move-in date";
+  const nums=out?["03","04","06"]:["02","03","04"];
+  $("#n-cond").textContent=nums[0];$("#n-photo").textContent=nums[1];$("#n-sign").textContent=nums[2];
+  progress();
+}
+document.querySelectorAll('[name="type"]').forEach(el=>el.addEventListener("change",applyType));
+
+/* progress */
+function secs(){return [...document.querySelectorAll("[data-sec]")].filter(s=>!s.hidden)}
+function progress(){
+  const s=secs();const y=window.scrollY+innerHeight*.4;
+  $("#progress").innerHTML=s.map(x=>`<span class="${x.offsetTop<y?"done":""}"></span>`).join("");
+}
+addEventListener("scroll",progress,{passive:true});
+
+/* photos */
+let photos=[];
+function addFiles(list){for(const f of list){if(f.type.startsWith("image/")||/\.hei[cf]$/i.test(f.name))photos.push({f,url:URL.createObjectURL(f)})}drawThumbs()}
+function drawThumbs(){
+  $("#thumbs").innerHTML=photos.map((p,i)=>`<figure><img src="${p.url}" alt="${esc(p.f.name)}"><button type="button" aria-label="Remove ${esc(p.f.name)}" data-i="${i}">×</button></figure>`).join("");
+}
+$("#photos").addEventListener("change",e=>{addFiles(e.target.files);e.target.value=""});
+$("#thumbs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const i=+b.dataset.i;URL.revokeObjectURL(photos[i].url);photos.splice(i,1);drawThumbs()});
+const drop=$("#drop");
+drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("over")});
+drop.addEventListener("dragleave",()=>drop.classList.remove("over"));
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("over");addFiles(e.dataTransfer.files)});
+
+/* draft save (this device only) */
+const KEY="nsu-housing-form-v1";
+function saveDraft(){try{const d={};document.querySelectorAll("#form input,#form textarea").forEach(el=>{if(!el.id||el.type==="file")return;d[el.id]=(el.type==="checkbox"||el.type==="radio")?el.checked:el.value});localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+function loadDraft(){try{const d=JSON.parse(localStorage.getItem(KEY)||"null");if(!d)return;for(const[k,v]of Object.entries(d)){const el=document.getElementById(k);if(!el)continue;if(el.type==="checkbox"||el.type==="radio")el.checked=v;else el.value=v}
+  ROOMS.forEach(r=>{$("#det-"+r.id).hidden=!$(`#st-${r.id}-issue`).checked});$("#rec-box").hidden=!$("#rec-y").checked}catch(e){}}
+$("#form").addEventListener("input",saveDraft);$("#form").addEventListener("change",saveDraft);
+loadDraft();applyType();
+
+/* build report */
+function fmtDate(v){if(!v)return"";const[y,m,d]=v.split("-");return`${m}/${d}/${y}`}
+function build(){
+  const out=isOut();const L=[];const v=id=>$("#"+id).value.trim();
+  const locs=[...document.querySelectorAll("#locations input:checked")].map(i=>i.value);
+  const term=(document.querySelector('[name="term"]:checked')||{}).value||"";
+  L.push(`OFF-CAMPUS HOUSING – ${out?"MOVE-OUT CHECK-OUT & EXIT SURVEY":"MOVE-IN CONDITION REPORT"}`,"");
+  L.push(`Student: ${v("name")}`,`Mobile: ${v("mobile")}`,`Program: ${v("program")}`,`${out?"Move-out":"Move-in"} date: ${fmtDate(v("date"))}`,`Term: ${term}`,`Location: ${locs.join("; ")}`);
+  if(v("community"))L.push(`Community: ${v("community")}`);if(v("apt"))L.push(`Apt #: ${v("apt")}`);
+  if(out){L.push("","MOVE-OUT CHECKLIST");CHECKLIST.forEach((c,i)=>L.push(`[${$("#chk-"+i).checked?"x":" "}] ${c}`))}
+  L.push("","UNIT CONDITION");
+  ROOMS.forEach(r=>{const st=document.querySelector(`[name="st-${r.id}"]:checked`).value;
+    if(st==="ok")L.push(`${r.name}: Satisfactory`);
+    else if(st==="na")L.push(`${r.name}: Not in unit`);
+    else{const tags=[...document.querySelectorAll(`#det-${r.id} input:checked`)].map(i=>i.value);
+      L.push(`${r.name}: ISSUES – ${tags.join(", ")||"(none tagged)"}`);
+      const w=r.which&&v("which-"+r.id);if(w)L.push(`  Room: ${w}`);const n=v("note-"+r.id);if(n)L.push(`  Notes: ${n}`)}});
+  L.push("",`PHOTOS: ${photos.length} attached${photos.length?" – "+photos.map(p=>p.f.name).join(", "):""}`);
+  if(out){L.push("","SATISFACTION (1 = very dissatisfied, 5 = very satisfied)");
+    LIKERT.forEach((q,i)=>{const s=document.querySelector(`[name="lk-${i}"]:checked`);L.push(`${i+1}. ${q}: ${s?s.value:"–"}`)});
+    const rec=(document.querySelector('[name="rec"]:checked')||{}).value||"–";L.push(`10. Recommendations: ${rec}${rec==="Yes"&&v("recText")?" – "+v("recText"):""}`)}
+  L.push("","ACKNOWLEDGEMENT",`Condition statement confirmed: ${$("#ack1").checked?"Yes":"No"}`);
+  if(out)L.push(`Move-out procedures certified: ${$("#ack2").checked?"Yes":"No"}`);
+  L.push(`Signed: ${v("sig")}`,`Date: ${fmtDate(v("sigdate"))}`);
+  return L.join("\n");
+}
+function validate(){
+  const out=isOut();const miss=[];const v=id=>$("#"+id).value.trim();
+  if(!v("name"))miss.push("name");if(!v("mobile"))miss.push("mobile number");if(!v("program"))miss.push("program");if(!v("date"))miss.push(out?"move-out date":"move-in date");
+  if(!document.querySelector('[name="term"]:checked'))miss.push("term");
+  if(!document.querySelector("#locations input:checked"))miss.push("housing location");
+  if(out&&CHECKLIST.some((_,i)=>!$("#chk-"+i).checked))miss.push("all move-out checklist items");
+  if(!$("#ack1").checked)miss.push("condition acknowledgement");
+  if(out&&!$("#ack2").checked)miss.push("move-out certification");
+  if(!v("sig"))miss.push("signature");if(!v("sigdate"))miss.push("date of completion");
+  return miss;
+}
+$("#form").addEventListener("submit",e=>{
+  e.preventDefault();const miss=validate();const err=$("#err");
+  if(miss.length){err.textContent="Please complete: "+miss.join(", ")+".";err.hidden=false;return}
+  err.hidden=true;const text=build();const name=$("#name").value.trim();
+  const subj=`${isOut()?"Move-Out Check-Out":"Move-In Condition Report"} – ${name}`;
+  let body=text;if(body.length>1800)body=body.slice(0,1800)+"\n…(report shortened – full copy pasted below if needed)";
+  $("#mailto").href=`mailto:realestateleases@nova.edu,odoo@nova.edu?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  $("#summary").textContent=text;
+  $("#photo-count").textContent=photos.length===1?"1 photo":photos.length+" photos";
+  $("#form").hidden=true;$("#progress").hidden=true;$("#done").hidden=false;scrollTo(0,0);
+});
+$("#edit").addEventListener("click",()=>{$("#form").hidden=false;$("#progress").hidden=false;$("#done").hidden=true;progress()});
+$("#copy").addEventListener("click",async()=>{const t=$("#summary").textContent;const b=$("#copy");
+  try{await navigator.clipboard.writeText(t);b.textContent="Copied"}catch(e){const r=document.createRange();r.selectNodeContents($("#summary"));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected – press copy"}
+  setTimeout(()=>b.textContent="Copy report",2500)});
+</script>
+
+</body>
+</html>
