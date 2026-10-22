@@ -262,7 +262,7 @@ $("#rooms").innerHTML=ROOMS.map(r=>`
   </div>
  </div>`).join("");
 $("#likert").innerHTML=`<div class="legend"><span>1 = Very dissatisfied</span><span>5 = Very satisfied</span></div>`+LIKERT.map((q,i)=>`
- <div class="q" role="radiogroup" aria-label="${esc(q)}"><p>${i+1}. ${esc(q)}</p>
+ <div class="q" role="radiogroup" aria-label="${esc(q)}"><p class="req">${i+1}. ${esc(q)}</p>
  <div class="scale">${[1,2,3,4,5].map(v=>`<label><input type="radio" name="lk-${i}" id="lk-${i}-${v}" value="${v}"><span>${v}</span></label>`).join("")}</div></div>`).join("");
 
 ROOMS.forEach(r=>document.querySelectorAll(`[name="st-${r.id}"]`).forEach(el=>el.addEventListener("change",()=>{$("#det-"+r.id).hidden=el.value!=="issue"||!el.checked})));
@@ -344,6 +344,7 @@ function validate(){
   if(!document.querySelector('[name="term"]:checked'))miss.push("term");
   if(!document.querySelector("#locations input:checked"))miss.push("housing location");
   if(out&&CHECKLIST.some((_,i)=>!$("#chk-"+i).checked))miss.push("all move-out checklist items");
+  if(out){const un=LIKERT.map((_,i)=>i+1).filter(n=>!document.querySelector(`[name="lk-${n-1}"]:checked`));if(un.length)miss.push("housing experience rating"+(un.length>1?"s":"")+" "+un.join(", "))}
   if(!$("#ack1").checked)miss.push("condition acknowledgement");
   if(out&&!$("#ack2").checked)miss.push("move-out certification");
   if(!v("sig"))miss.push("signature");if(!v("sigdate"))miss.push("date of completion");
